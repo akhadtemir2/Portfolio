@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Оплата</title>
+    <link rel="stylesheet" href="{% static 'styles/payment.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/main_page.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #070016, #120033);
+    color: #ffffff;
+}
+
+/* HEADER */
+header {
+    background: #0b111a;
+    border-bottom: 1px solid #1f2a38;
+    display: flex;
+    justify-content: center;
+}
+.topbar {
+    width: 100%;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.logo {
+    width: 100px;
+    height: 50px;
+    background-image: url(../img/ICO_MIX.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+}
+nav {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--muted);
+}
+.nav_2 {
+    align-items: center;
+}
+.search-row {
+    width: 75%;
+    display: flex;
+    justify-content: space-between;
+    margin: 30px auto;
+}
+
+.search {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    max-width: 380px;
+    gap: 10px;
+}
+.search input {
+    display: inline-block;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: none;
+    background: var(--panel);
+    color: var(--text);
+}
+/* (rest omitted) */
+</style>
+
+<header>
+    <div class="topbar">
+        <div class="logo"></div>
+        <nav class="nav_1">
+            <a href="#">МОЙ ИНВЕНТАРЬ</a>
+            <a href="#">БИБЛИОТЕКА</a>
+            <a href="#">СООБЩЕСТВО</a>
+        </nav>
+        <nav class="nav_2">
+            <a href="#">Поддержка</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="btn btn-log">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="btn btn-sign">Выход</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-log">Вход</a>
+                <a href="{% url 'register' %}" class="btn btn-sign">Регистрация</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="search-row">
+        <div class="search">
+            <input type="text" placeholder="Искать в магазине" />
+            <a href="{% url 'main_page' %}" class="btn-1">Главное</a>
+            <a href="{% url 'game_list' %}" class="btn-1">Все игры</a>
+        </div>
+        <a href="{% url 'cart_view' %}" class="btn-1">Корзина</a>
+    </div>
+
+    <div class="container">
+        <section class="payment-box">
+            <h1>Оплата</h1>
+
+            {% if cart and cart.items.exists %}
+                {% for item in cart.items.all %}
+                <div class="game-item">
+                    <img src="{% if item.game.image %}{{ item.game.image.url }}{% else %}{% static 'img/placeholder.png' %}{% endif %}" alt="{{ item.game.title }}">
+                    <div class="game-info">
+                        <h3>{{ item.game.title }}</h3>
+                        <span>Базовая игра</span><br>
+                        <span style="color:#00b3ff;">{{ item.get_total_price|floatformat:0 }} KZT</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Корзина пуста</p>
+            {% endif %}
+
+            <div class="methods">
+                <label class="method">
+                    <input type="radio" name="pay" id="cardPay" checked>
+                    Банковская карта
+                </label>
+                <label class="method">
+                    <input type="radio" name="pay" id="walletPay">
+                    Электронный кошелек
+                </label>
+            </div>
+
+            <form method="post" action="{% url 'checkout' %}" id="paymentForm">
+                {% csrf_token %}
+                <div id="cardForm">
+                    <div class="form-group">
+                        <label>Номер карты</label>
+                        <input type="text" name="card_number" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Срок действия</label>
+                            <input type="text" name="card_expiry" placeholder="MM / YY">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="password" name="card_cvv" placeholder="***">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wallets" id="wallets" style="display:none">
+                    <div class="wallet">
+                        <img src="{% static 'img/kaspi.webp' %}" alt="Kaspi Pay">
+                    </div>
+                    <div class="wallet">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay">
+                    </div>
+                    <div class="wallet">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay">
+                    </div>
+                    <div class="wallet">
+                        <img src="{% static 'img/paypal.png' %}" alt="PayPal">
+                    </div>
+                </div>
+
+                <button type="submit" class="pay-btn">Оплатить {{ cart.get_total_price|default:0|floatformat:0 }} KZT</button>
+            </form>
+        </section>
+
+        <aside class="summary">
+            <h2>Итого</h2>
+            <div class="summary-row">
+                <span>Игры</span>
+                <span>{{ cart.get_total_price|default:0|floatformat:0 }} KZT</span>
+            </div>
+            <div class="summary-row">
+                <span>Комиссия</span>
+                <span>0 KZT</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>К оплате</span>
+                <span>{{ cart.get_total_price|default:0|floatformat:0 }} KZT</span>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <div>© GAME BUY</div>
+        <div><a href="{% url 'home' %}">Главная</a> · <a href="{% url 'main_page' %}">Витрина</a> · <a href="{% url 'cart_view' %}">Корзина</a></div>
+    </div>
+</footer>
+
+<script>
+const cardPay = document.getElementById('cardPay');
+const walletPay = document.getElementById('walletPay');
+const cardForm = document.getElementById('cardForm');
+const wallets = document.getElementById('wallets');
+
+cardPay.addEventListener('change', () => {
+    cardForm.style.display = 'block';
+    wallets.style.display = 'none';
+});
+
+walletPay.addEventListener('change', () => {
+    cardForm.style.display = 'none';
+    wallets.style.display = 'grid';
+});
+</script>
+
+</body>
+</html>

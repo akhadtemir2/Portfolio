@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/main_page.css' %}">
+    <title>Заказ #{{ order.id }}</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Заказ #{{ order.id }}</h1>
+        <p>Статус: {{ order.status }}</p>
+        <p>Итого: {{ order.total_price|floatformat:0 }} KZT</p>
+        <ul>
+            {% for item in order.items.all %}
+                <li>{{ item.game.title }} — {{ item.price|floatformat:0 }} KZT × {{ item.quantity }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
