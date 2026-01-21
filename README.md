@@ -17,7 +17,7 @@
 <h2>👨‍💻 Software Development Projects:</h2>
 
 - <b> HTML, CSS and Django + DB </b>
-  - [Praciting DS & Algos in Python]([https://github.com/joshmadakor1/Algorithms-Practice](https://github.com/akhadtemir2/GameBUY---Game-Store.git))
+  - [Gaming Store - GameBuy](https://github.com/akhadtemir2/GameBUY---Game-Store.git)
 
 
 <h2> 🤳 Connect with me:</h2>
